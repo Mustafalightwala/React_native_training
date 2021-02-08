@@ -49,6 +49,7 @@ const styles = StyleSheet.create({
     imageStyle: {
         height: 200,
         width: 200,
+        resizeMode: 'contain',
         borderRadius: 5,
     },
     titleContainer: {

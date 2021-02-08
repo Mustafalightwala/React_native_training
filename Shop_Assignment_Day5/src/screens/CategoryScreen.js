@@ -19,11 +19,9 @@ const CategoryScreen = ({ navigation }) => {
     //Implementation of search logic
     const handleSearch = (text) => {
         const formatQuery = text.toLowerCase(); //remove case sensitivity from search
-        console.log(formatQuery);
         const filterData = _.filter(fullData,  category => {
             return contains(category, formatQuery); //checking for the search term in category
         })
-        console.log(filterData)
         setData(filterData);
     }
     const contains = (category, query) => {
@@ -35,7 +33,6 @@ const CategoryScreen = ({ navigation }) => {
 
     //fetching categories from fakestore API on the initial render
     useEffect(() => {
-        console.log("useEffect called");
         fetch('https://fakestoreapi.com/products/categories')
             .then(res=>res.json())
             .then(json=> {

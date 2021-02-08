@@ -17,12 +17,10 @@ const ProductScreen = ({ navigation }) => {
         const filterData = _.filter(fullData, product => {
             return contains(product, formatQuery);
         })
-        console.log(filterData)
         setData(filterData);
     }
     const contains = ({ title }, query) => {
         const updatedTitle = title.toLowerCase();
-        console.log(updatedTitle);
         if (updatedTitle.includes(query)) {
             return true;
         }
@@ -31,8 +29,6 @@ const ProductScreen = ({ navigation }) => {
 
     //fetching products of a specific category from fakestore API on the initial render
     useEffect(() => {
-        console.log("useEffect called");
-        console.log(category);
         fetch('https://fakestoreapi.com/products/category/' + category)
             .then(res => res.json())
             .then(json => {
@@ -108,6 +104,7 @@ const styles = StyleSheet.create({
         padding: 5,
         height: 80,
         width: 80,
+        resizeMode: 'contain',
         marginHorizontal: 5,
         shadowOpacity: 1,
     },
