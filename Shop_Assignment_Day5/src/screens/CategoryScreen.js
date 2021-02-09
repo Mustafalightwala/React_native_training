@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import {View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import SearchBar from "../components/SearchBar";
-import _ from "lodash";
+import usecategoryResults from "../hooks/useCategoryResults"
 
 const CategoryScreen = ({ navigation }) => {
     //images for category
@@ -9,70 +9,57 @@ const CategoryScreen = ({ navigation }) => {
         'electronics': require("../../assets/icons/electronics.png"),
         'jewelery': require("../../assets/icons/jewelery.png"),
         'men clothing': require("../../assets/icons/men.png"),
-        'women clothing': require("../../assets/icons/women.png"), 
+        'women clothing': require("../../assets/icons/women.png"),
     }
 
-    //states- for managing categories while searching
-    const [data, setData] = useState([]);
-    const [fullData, setFullData] = useState([]);
-    
-    //Implementation of search logic
-    const handleSearch = (text) => {
-        const formatQuery = text.toLowerCase(); //remove case sensitivity from search
-        const filterData = _.filter(fullData,  category => {
-            return contains(category, formatQuery); //checking for the search term in category
-        })
-        setData(filterData);
-    }
-    const contains = (category, query) => {
-        if(category.includes(query)) {
-            return true;
-        }
-        return false;
-    }
-
-    //fetching categories from fakestore API on the initial render
-    useEffect(() => {
-        fetch('https://fakestoreapi.com/products/categories')
-            .then(res=>res.json())
-            .then(json=> {
-                setData(json)
-                setFullData(json)
-            })
-            .catch(error => {
-                console.log(error);
-            })
-    }, [])
+    // A Reusable hook that can be used to handle search and remote request to the api.
+    const [handleSearch, data, loading] = usecategoryResults();
 
     //rendering components
-    return(
+    return (
         <View style={styles.container}>
 
             {/*Search Bar*/}
-            <SearchBar 
-                placeholder = 'Search Categories'
-                onTermChange={(newTerm)=>{ handleSearch(newTerm) }}
+            <SearchBar
+                placeholder='Search Categories'
+                onTermChange={(newTerm) => { handleSearch(newTerm) }}
             />
-            
-            {/*List of Categories*/}
 
-            <FlatList
-                keyExtractor={ (item)=>item }
-                data={data}
-                renderItem = {({ item }) => {
-                    return(
-                        <TouchableOpacity onPress={() => {navigation.navigate('Product', item)}}>
-                            <View style={styles.categoryCard}>
-                                    <Image 
-                                        style={styles.imageStyle}
-                                        source={images[item]}
-                                    />
-                                    <Text style={styles.titleStyle}>{item[0].toUpperCase()+item.slice(1)}</Text>
-                            </View>
-                        </TouchableOpacity>
-                    );
-                }}
-            />
+            {/*List of Categories*/}
+            {
+                (loading) ?
+                (//loading indicator when no data is present to display
+                    <ActivityIndicator style={{
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flex: 1,
+                    }}
+                        color="#008000"
+                        animating
+                        size="large"
+                    />
+                )
+                :
+                (
+                    <FlatList
+                        keyExtractor={(item) => item}
+                        data={data}
+                        renderItem={({ item }) => {
+                            return (
+                                <TouchableOpacity onPress={() => { navigation.navigate('Product', item) }}>
+                                    <View style={styles.categoryCard}>
+                                        <Image
+                                            style={styles.imageStyle}
+                                            source={images[item]}
+                                        />
+                                        <Text style={styles.titleStyle}>{item[0].toUpperCase() + item.slice(1)}</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            );
+                        }}
+                    />
+                )
+            }
 
         </View>
     );
@@ -85,10 +72,10 @@ const styles = StyleSheet.create({
         backgroundColor: 'white'
     },
     categoryContainer: {
-        flexDirection:'row',
-        justifyContent:'space-around',
+        flexDirection: 'row',
+        justifyContent: 'space-around',
         borderWidth: 1,
-        borderColor:'black',
+        borderColor: 'black',
         margin: 15,
     },
     categoryCard: {
@@ -107,7 +94,7 @@ const styles = StyleSheet.create({
     },
     imageStyle: {
         alignSelf: 'center',
-        marginHorizontal:5,
+        marginHorizontal: 5,
         shadowOpacity: 1,
     }
 });
