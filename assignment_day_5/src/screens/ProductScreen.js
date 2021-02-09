@@ -1,78 +1,61 @@
-import React, {useState, useEffect} from 'react';
-import {View, Text, StyleSheet, FlatList, TouchableOpacity, Image} from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import SearchBar from "../components/SearchBar";
-import _ from "lodash";
+import useProductResults from "../hooks/useProductResults";
 
 const ProductScreen = ({ navigation }) => {
     const category = navigation.state.params;
 
-    //states- for managing categories while searching
-    const [data, setData] = useState([]);
-    const [fullData, setFullData] = useState([]);
-    
-    //Implementation of search logic
-    const handleSearch = (text) => {
-        const formatQuery = text.toLowerCase();
-        console.log(formatQuery);
-        const filterData = _.filter(fullData, product => {
-            return contains(product, formatQuery);
-        })
-        console.log(filterData)
-        setData(filterData);
-    }
-    const contains = ({title}, query) => {
-        const updatedTitle = title.toLowerCase();
-        console.log(updatedTitle);
-        if(updatedTitle.includes(query)) {
-            return true;
-        }
-        return false;
-    }
+    // A Reusable hook that can be used to handle search and remote request to the api.
+    const [handleSearch, data, loading] =  useProductResults(category);
 
-    //fetching products of a specific category from fakestore API on the initial render
-    useEffect(() => {
-        fetch('https://fakestoreapi.com/products/category/'+category)
-            .then(res=>res.json())
-            .then(json=> {
-                setData(json)
-                setFullData(json)
-            })
-            .catch(error => {
-                console.log(error);
-            })
-    }, [])
-
-    return  (
+    return (
         <View style={styles.container}>
 
             {/*Search Bar*/}
-            <SearchBar 
+            <SearchBar
                 placeholder={"Search in " + category}
-                onTermChange={(newTerm)=> handleSearch(newTerm)}
+                onTermChange={(newTerm) => handleSearch(newTerm)}
             />
 
             {/*List of Products*/}
-            <FlatList
-                keyExtractor={ (item)=>item.id.toString() }
-                data={data}
-                renderItem = {({ item }) => {
-                    return(
-                        <TouchableOpacity style={{elevation:10}} onPress={()=> {navigation.navigate('Detail', item)}}>
-                            <View style={styles.categoryCard}>
-                                    <Image 
-                                        style={styles.imageStyle}
-                                        source={{uri: item.image}}
-                                    />
-                                    <View style={styles.infoViewStyle}>
-                                        <Text style={styles.titleStyle}>{item.title}</Text>
-                                        <Text style={styles.infoStyle}>Price: ${item.price}</Text>
-                                        {/* <Text style={styles.infoStyle}>Rating: {item.rating}/5</Text> */}
+            {
+                (loading) ?
+                (//loading indicator when no data is present to display
+                    <ActivityIndicator style={{
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flex: 1,
+                    }}
+                        color="#008000"
+                        animating
+                        size="large"
+                    />
+                )
+                :
+                (
+                    <FlatList
+                        keyExtractor={(item) => item.id.toString()}
+                        data={data}
+                        renderItem={({ item }) => {
+                            return (
+                                <TouchableOpacity style={{ elevation: 10 }} onPress={() => { navigation.navigate('Detail', item) }}>
+                                    <View style={styles.categoryCard}>
+                                        <Image
+                                            style={styles.imageStyle}
+                                            source={{ uri: item.image }}
+                                        />
+                                        <View style={styles.infoViewStyle}>
+                                            <Text style={styles.titleStyle}>{item.title}</Text>
+                                            <Text style={styles.infoStyle}>Price: ${item.price}</Text>
+                                        </View>
                                     </View>
-                            </View>
-                        </TouchableOpacity>
-                    );
-                }}
-            />
+                                </TouchableOpacity>
+                            );
+                        }}
+                    />
+                )
+            }
         </View>
     );
 };
@@ -97,7 +80,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     infoStyle: {
-        marginLeft: 25,
+        marginLeft: 15,
         alignSelf: 'flex-start',
         fontSize: 18,
     },
@@ -108,12 +91,12 @@ const styles = StyleSheet.create({
         height: 80,
         width: 80,
         resizeMode: 'contain',
-        marginHorizontal:5,
+        marginHorizontal: 5,
         shadowOpacity: 1,
     },
-    infoViewStyle:{
+    infoViewStyle: {
         alignItems: 'flex-start',
-        flex:1,
+        flex: 1,
     }
 });
 

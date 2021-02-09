@@ -15,7 +15,6 @@ const DetailScreen = ({ navigation }) => {
             <View style={styles.titleContainer}>
                 <Text style={styles.header}>{productDetail.title}</Text>
                 <Text style={styles.body}>In {productDetail.category}</Text>
-                {/* <Text style={styles.rating}>Rating: {productDetail.rating}/5</Text> */}
             </View>
 
             {/*Product details with price*/}
@@ -49,8 +48,8 @@ const styles = StyleSheet.create({
     imageStyle: {
         height: 200,
         width: 200,
-        borderRadius: 5,
         resizeMode: 'contain',
+        borderRadius: 5,
     },
     titleContainer: {
         paddingBottom: 20,
