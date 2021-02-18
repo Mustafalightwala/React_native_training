@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
-import {View, StyleSheet} from 'react-native';
+import {StyleSheet} from 'react-native';
+import Container from '../components/Container';
 import Button from '../components/Button';
 import Dialog from '../components/Dialog';
 
@@ -22,10 +23,10 @@ class LoadingScreen extends Component {
     };
 
     return (
-      <View style={styles.container}>
+      <Container style={styles.container}>
         <Button text={'Show Dialog'} onTouch={makeDialogVisible} />
         <Dialog visibility={this.state.visibility} />
-      </View>
+      </Container>
     );
   }
 }

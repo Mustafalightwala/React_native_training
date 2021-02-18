@@ -1,8 +1,10 @@
 import React, {useState} from 'react';
-import {View, PermissionsAndroid, Platform, Image} from 'react-native';
-import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
-import styles from '../constants/styles';
+import {StyleSheet, Image, Alert} from 'react-native';
+import Container from '../components/Container';
 import Button from '../components/Button';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
+import requestCameraPermission from '../Permissions/CameraPermission';
+import requestStoragePermission from '../Permissions/StoragePermission';
 
 let options = {
   mediaType: 'photo',
@@ -11,70 +13,46 @@ let options = {
     path: 'images',
   },
 };
-
-const requestCameraPermission = async () => {
-  if (Platform.OS === 'android') {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.CAMERA,
-        {
-          title: 'Camera Permission',
-          message: 'App needs camera permission',
-        },
-      );
-      // If CAMERA Permission is granted
-      return granted === PermissionsAndroid.RESULTS.GRANTED;
-    } catch (err) {
-      console.warn(err);
-      return false;
-    }
-  } else {
-    return true;
-  }
-};
-
-const requestExternalWritePermission = async () => {
-  if (Platform.OS === 'android') {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-        {
-          title: 'External Storage Write Permission',
-          message: 'App needs write permission',
-        },
-      );
-      // If WRITE_EXTERNAL_STORAGE Permission is granted
-      return granted === PermissionsAndroid.RESULTS.GRANTED;
-    } catch (err) {
-      console.warn(err);
-      alert('Write permission err', err);
-    }
-    return false;
-  } else {
-    return true;
-  }
-};
-
 const ImageScreen = () => {
   const [filePath, setFilePath] = useState({});
+
+  const chooseImage = async () => {
+    let isStoragePermitted = await requestStoragePermission();
+    if (isStoragePermitted) {
+      launchImageLibrary(options, (response) => {
+        if (response.didCancel) {
+          Alert.alert('User cancelled camera picker');
+          return;
+        } else if (response.errorCode === 'camera_unavailable') {
+          Alert.alert('Camera not available on device');
+          return;
+        } else if (response.errorCode === 'permission') {
+          Alert.alert('Permission not satisfied');
+          return;
+        } else if (response.errorCode === 'others') {
+          Alert.alert(response.errorMessage);
+          return;
+        }
+        setFilePath(response);
+      });
+    }
+  };
 
   const captureImage = async () => {
     let isCameraPermitted = await requestCameraPermission();
     if (isCameraPermitted) {
       launchCamera(options, (response) => {
-        console.log('Response = ', response);
-
         if (response.didCancel) {
-          alert('User cancelled camera picker');
+          Alert.alert('User cancelled camera picker');
           return;
         } else if (response.errorCode === 'camera_unavailable') {
-          alert('Camera not available on device');
+          Alert.alert('Camera not available on device');
           return;
         } else if (response.errorCode === 'permission') {
-          alert('Permission not satisfied');
+          Alert.alert('Permission not satisfied');
           return;
         } else if (response.errorCode === 'others') {
-          alert(response.errorMessage);
+          Alert.alert(response.errorMessage);
           return;
         }
         setFilePath(response);
@@ -82,35 +60,22 @@ const ImageScreen = () => {
     }
   };
 
-  const chooseImage = async () => {
-    let isStoragePermitted = await requestExternalWritePermission();
-    if (isStoragePermitted) {
-      launchImageLibrary(options, (response) => {
-        console.log(response);
-        if (response.didCancel) {
-          alert('User cancelled camera picker');
-          return;
-        } else if (response.errorCode === 'camera_unavailable') {
-          alert('Camera not available on device');
-          return;
-        } else if (response.errorCode === 'permission') {
-          alert('Permission not satisfied');
-          return;
-        } else if (response.errorCode === 'others') {
-          alert(response.errorMessage);
-          return;
-        }
-        setFilePath(response);
-      });
-    }
-  };
   return (
-    <View style={styles.container}>
+    <Container>
       <Image source={{uri: filePath.uri}} style={styles.imageStyle} />
       <Button text={'Pick an Image'} onTouch={chooseImage} />
       <Button text={'Capture an Image'} onTouch={captureImage} />
-    </View>
+    </Container>
   );
 };
+
+const styles = StyleSheet.create({
+  imageStyle: {
+    width: 200,
+    height: 200,
+    margin: 5,
+    resizeMode: 'contain',
+  },
+});
 
 export default ImageScreen;

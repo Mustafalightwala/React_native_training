@@ -57,3 +57,20 @@ buck-out/
 
 # CocoaPods
 /ios/Pods/
+
+# Optional eslint cache
+.eslintcache
+
+# Icon must end with two \r
+Icon
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Gradle files
+.gradle/
+
+ios/assignment_day_11/
+ios/assignment_day_11-tvOS/
+ios/assignment_day_11-tvOSTests/
+ios/assignment_day_11.xcodeproj/

@@ -18,7 +18,7 @@ const Dialog = ({visibility}) => {
 const styles = StyleSheet.create({
   outerDialog: {
     flex: 1,
-    backgroundColor: '#00000020',
+    backgroundColor: colors.backgroundOpacity,
     justifyContent: 'center',
     alignItems: 'center',
   },
